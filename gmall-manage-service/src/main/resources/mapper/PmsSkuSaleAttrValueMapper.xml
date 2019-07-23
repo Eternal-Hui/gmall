@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.atguigu.gmall.manage.mapper.PmsSkuSaleAttrValueMapper">
+    <select id="selectCheckSkuBySalesValueIds"  resultType="com.atguigu.gmall.bean.PmsSkuSaleAttrValue">
+        SELECT * FROM pms_sku_sale_attr_value WHERE sale_attr_value_id IN (${sale_attr_ids})
+    </select>
+
+    <select id="selectCheckSkuBySalesValueIdsTwo" resultMap="selectCheckSkuBySalesValueIdsTwoMap">
+        SELECT
+            ssav.*,
+            si.*,
+            ssav.id AS ssav_id,
+            si.id AS si_id
+        FROM
+            pms_sku_sale_attr_value ssav,
+            pms_sku_info si
+        WHERE
+            sale_attr_value_id IN ( ${sale_attr_ids} )
+        AND
+            ssav.sku_id = si.id
+    </select>
+
+    <resultMap id="selectCheckSkuBySalesValueIdsTwoMap" type="com.atguigu.gmall.bean.PmsSkuInfo" autoMapping="true">
+        <id column="si_id" property="id"></id>
+        <collection property="skuSaleAttrValueList" ofType="com.atguigu.gmall.bean.PmsSkuSaleAttrValue" autoMapping="true">
+            <id column="ssav_id" property="id"></id>
+        </collection>
+    </resultMap>
+
+
+    <select id="selectCheckSkuBySpuId" resultMap="selectCheckSkuBySpuIdMap">
+        SELECT
+            ssav.*,
+            si.*,
+            ssav.id AS ssav_id,
+            si.id AS si_id
+        FROM
+            pms_sku_sale_attr_value ssav,
+            pms_sku_info si
+        WHERE
+            si.product_id IN ( ${spuId} )
+        AND
+            ssav.sku_id = si.id
+    </select>
+
+    <resultMap id="selectCheckSkuBySpuIdMap" type="com.atguigu.gmall.bean.PmsSkuInfo" autoMapping="true">
+        <id column="si_id" property="id"></id>
+        <collection property="skuSaleAttrValueList" ofType="com.atguigu.gmall.bean.PmsSkuSaleAttrValue" autoMapping="true">
+            <id column="ssav_id" property="id"></id>
+        </collection>
+    </resultMap>
+
+
+    <select id="selectSpuSaleAttrListCheckedBySkuId" resultMap="selectSpuSaleAttrListCheckedBySkuIdMap">
+        SELECT
+           psa.id as psa_id,psa.*,psav.id as psav_id,psav.* ,if(ssav.sku_id,1,0) as ischecked
+        FROM
+            pms_product_sale_attr psa
+            INNER JOIN pms_product_sale_attr_value psav ON psa.product_id = psav.product_id
+            AND psa.sale_attr_id = psav.sale_attr_id
+            LEFT JOIN pms_sku_sale_attr_value ssav ON ssav.sale_attr_id = psa.sale_attr_id
+            AND ssav.sale_attr_value_id = psav.id
+            AND ssav.sku_id = #{skuId}
+        WHERE
+            psa.product_id = #{spuId}
+    </select>
+
+    <resultMap id="selectSpuSaleAttrListCheckedBySkuIdMap" type="com.atguigu.gmall.bean.PmsProductSaleAttr" autoMapping="true">
+        <result column="psa_id" property="id"></result>
+        <collection property="spuSaleAttrValueList" ofType="com.atguigu.gmall.bean.PmsProductSaleAttrValue" autoMapping="true">
+            <result column="psav_id" property="id"></result>
+        </collection>
+    </resultMap>
+
+</mapper>
